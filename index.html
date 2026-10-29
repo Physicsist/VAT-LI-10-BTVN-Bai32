@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Bài 32: Lực Hướng Tâm Và Gia Tốc Hướng Tâm</title>
+    <!-- Tích hợp MathJax hiển thị công thức chuẩn Mathtype -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            chtml: { scale: 1.02 }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #dbeafe;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 60px; }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        header h1 { font-size: 1.4rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        header p { font-size: 0.95rem; opacity: 0.9; }
+
+        .container { max-width: 920px; margin: 20px auto; padding: 0 15px; }
+
+        /* 3 Cụm Nút / Ô nhập chính theo yêu cầu */
+        .control-bar {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            border: 2px solid #cbd5e1;
+        }
+        @media (max-width: 768px) {
+            .control-bar { grid-template-columns: 1fr; }
+        }
+        .student-inputs {
+            display: flex;
+            gap: 8px;
+        }
+        .student-inputs input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #94a3b8;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .student-inputs input:focus { border-color: var(--primary); }
+
+        .btn {
+            padding: 11px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-sound { background: #8b5cf6; color: white; }
+        .btn-sound.muted { background: #64748b; }
+        .btn-report { background: var(--success); color: white; }
+        .btn-report:hover { background: #15803d; }
+
+        /* Tabs Cấp độ */
+        .level-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 14px 10px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            position: relative;
+        }
+        .tab-btn.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .tab-btn.locked {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 2px dashed #cbd5e1;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 0.78rem;
+            padding: 2px 8px;
+            border-radius: 99px;
+            margin-top: 4px;
+            background: #cbd5e1;
+            color: #1e293b;
+        }
+        .tab-btn.active .badge { background: var(--primary); color: white; }
+
+        /* Thanh trạng thái tiến độ & Chế độ GV */
+        .status-banner {
+            background: var(--warning-bg);
+            border-left: 5px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .teacher-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .teacher-box input[type="password"] {
+            width: 115px;
+            padding: 6px 10px;
+            border: 1px solid #94a3b8;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 3px;
+            -webkit-text-security: disc;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: #334155;
+            color: white;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-retry {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Card câu hỏi */
+        .question-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .q-text { font-size: 1.05rem; margin-bottom: 14px; font-weight: 500; }
+
+        /* Khung chứa Hình vẽ SVG + Công thức MathJax chuẩn Mathtype */
+        .svg-container {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 14px;
+            margin: 12px 0 16px 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+        .figure-legend {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .figure-legend div { margin: 2px 0; }
+
+        /* Các lựa chọn đáp án */
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 640px) { .options-list { grid-template-columns: 1fr; } }
+
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        .option-btn:disabled { cursor: default; }
+        .option-btn.correct {
+            background: var(--success-bg) !important;
+            border-color: var(--success) !important;
+            color: #065f46;
+            font-weight: 700;
+        }
+        .option-btn.wrong {
+            background: var(--danger-bg) !important;
+            border-color: var(--danger) !important;
+            color: #991b1b;
+        }
+        .opt-letter {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .option-btn.correct .opt-letter { background: var(--success); color: white; }
+        .option-btn.wrong .opt-letter { background: var(--danger); color: white; }
+
+        /* Giải thích hiện ngay sau khi chọn */
+        .feedback-box {
+            margin-top: 14px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .feedback-box.show { display: block; animation: fadeIn 0.25s ease-in; }
+        .feedback-box.ok { background: var(--success-bg); border-left: 4px solid var(--success); color: #064e3b; }
+        .feedback-box.err { background: var(--danger-bg); border-left: 4px solid var(--danger); color: #7f1d1d; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Modal báo cáo kết quả */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 15px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: white;
+            max-width: 520px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+        .modal-card h2 { color: var(--primary); margin-bottom: 12px; }
+        .report-box {
+            background: #f8fafc;
+            border: 2px dashed #94a3b8;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: left;
+            margin: 15px 0;
+            font-size: 0.98rem;
+        }
+        .report-box p { margin: 6px 0; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CHỦ ĐỀ 32: LỰC HƯỚNG TÂM VÀ GIA TỐC HƯỚNG TÂM</h1>
+    <p> Đề luyện tập tương tác tại nhà – Tự động đảo câu hỏi & vị trí đáp án </p>
+</header>
+
+<div class="container">
+    <!-- 3 NÚT / Ô CHỨC NĂNG RÕ RÀNG THEO YÊU CẦU -->
+    <div class="control-bar">
+        <!-- 1. Nút âm thanh vui nhộn, bất ngờ -->
+        <button id="btnSound" class="btn btn-sound" onclick="toggleSound()">
+            🔊 Âm thanh: BẬT (Vui nhộn)
+        </button>
+
+        <!-- 2. Ô nhập họ tên, lớp -->
+        <div class="student-inputs">
+            <input type="text" id="studentName" placeholder="Nhập Họ và tên học sinh...">
+            <input type="text" id="studentClass" placeholder="Lớp (VD: 10A1)" style="max-width: 140px;">
+        </div>
+
+        <!-- 3. Nút báo họ tên, kết quả thực hiện -->
+        <button class="btn btn-report" onclick="showReportModal()">
+            🏆 Báo Họ Tên & Kết Quả
+        </button>
+    </div>
+
+    <!-- CÁC TAB CẤP ĐỘ -->
+    <div class="level-tabs">
+        <div id="tab1" class="tab-btn active" onclick="switchLevel(1)">
+            <div>CẤP ĐỘ 1 (Nhận biết - 12 câu)</div>
+            <span class="badge" id="badge1">Đạt 12/12: 0/3 lần</span>
+        </div>
+        <div id="tab2" class="tab-btn locked" onclick="switchLevel(2)">
+            <div>🔒 CẤP ĐỘ 2 (7 - 8 Điểm: 5 câu)</div>
+            <span class="badge" id="badge2">Chưa mở khóa</span>
+        </div>
+        <div id="tab3" class="tab-btn locked" onclick="switchLevel(3)">
+            <div>🔒 CẤP ĐỘ 3 (9 - 10 Điểm: 5 câu)</div>
+            <span class="badge" id="badge3">Chưa mở khóa</span>
+        </div>
+    </div>
+
+    <!-- THANH TRẠNG THÁI & MỞ KHÓA GIÁO VIÊN (ẨN MÃ DẠNG ****) -->
+    <div class="status-banner">
+        <div>
+            <strong id="statusTitle">📌 Nhiệm vụ Cấp độ 1:</strong>
+            <span id="statusDesc">Làm hết 12 câu và đạt đúng 12/12 đủ <b>3 lần</b> để mở khóa Cấp độ 2 & 3!</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button class="btn-retry" onclick="retryCurrentLevel()">🔄 Đảo đề & Làm lại Cấp độ này</button>
+            <div class="teacher-box">
+                <input type="password" id="teacherCode" placeholder="****" autocomplete="off" title="Nhập mật mã Giáo viên">
+                <button class="btn-sm" onclick="unlockByTeacher()">🔑 Mở khóa GV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VÙNG HIỂN THỊ DANH SÁCH CÂU HỎI -->
+    <div id="quizArea"></div>
+</div>
+
+<!-- MODAL BÁO CÁO KẾT QUẢ -->
+<div id="reportModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2>📋 PHIẾU BÁO CÁO KẾT QUẢ HỌC TẬP</h2>
+        <div class="report-box" id="reportContent"></div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="btn btn-report" onclick="copyReport()">📋 Sao chép gửi Giáo viên</button>
+            <button class="btn" style="background:#64748b; color:white;" onclick="closeReportModal()">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* =========================================================================
+   1. HỆ THỐNG ÂM THANH VUI NHỘN, BẤT NGỜ (WEB AUDIO SYNTHESIS)
+   ========================================================================= */
+let soundEnabled = true;
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const btn = document.getElementById('btnSound');
+    if (soundEnabled) {
+        btn.innerHTML = '🔊 Âm thanh: BẬT (Vui nhộn)';
+        btn.classList.remove('muted');
+        playFunnySound(true);
+    } else {
+        btn.innerHTML = '🔇 Âm thanh: ĐÃ TẮT';
+        btn.classList.add('muted');
+    }
+}
+
+function playFunnySound(isCorrect) {
+    if (!soundEnabled) return;
+    initAudio();
+    const now = audioCtx.currentTime;
+
+    if (isCorrect) {
+        const style = Math.random() > 0.5 ? 1 : 2;
+        if (style === 1) {
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.065);
+                gain.gain.setValueAtTime(0.22, now + idx * 0.065);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.065 + 0.22);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + idx * 0.065);
+                osc.stop(now + idx * 0.065 + 0.23);
+            });
+        } else {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(420, now);
+            osc.frequency.exponentialRampToValueAtTime(1250, now + 0.18);
+            osc.frequency.setValueAtTime(920, now + 0.2);
+            osc.frequency.exponentialRampToValueAtTime(1550, now + 0.4);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.42);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.43);
+        }
+    } else {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+        osc.frequency.linearRampToValueAtTime(220, now + 0.28);
+        osc.frequency.linearRampToValueAtTime(95, now + 0.55);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.008, now + 0.56);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.57);
+    }
+}
+
+/* =========================================================================
+   2. KHO HÌNH VẼ SVG + CÔNG THỨC CHUẨN MATHTYPE (ĐÃ SỬA LỖI HIỂN THỊ)
+   - Các ký hiệu vectơ trên hình dùng nét vẽ mũi tên chuẩn xác + <tspan dy>
+   - Các biểu thức toán học hiển thị bằng MathJax chuẩn Mathtype 100%
+   ========================================================================= */
+const SVGs = {
+    // Hình 1: Sơ đồ chuẩn Vectơ vận tốc v_M tiếp tuyến và Gia tốc hướng tâm a_M (Trang 2)
+    centripetalBasic: `
+    <svg viewBox="0 0 260 200" width="250" height="190">
+        <defs>
+            <marker id="arrV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+            </marker>
+            <marker id="arrA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+            </marker>
+        </defs>
+        <!-- Đường tròn quỹ đạo -->
+        <circle cx="120" cy="115" r="72" fill="#eff6ff" stroke="#1e40af" stroke-width="2.5"/>
+        <circle cx="120" cy="115" r="4" fill="#0f172a"/>
+        <text x="106" y="132" font-weight="bold" font-size="14" font-family="serif" font-style="italic">O</text>
+        <text x="126" y="96" fill="#475569" font-weight="bold" font-size="14" font-family="serif" font-style="italic">r</text>
+        <!-- Bán kính nối M và tâm O -->
+        <line x1="120" y1="43" x2="120" y2="115" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <!-- Ký hiệu góc vuông giữa v_M và a_M -->
+        <rect x="120" y="43" width="10" height="10" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Chất điểm M ở đỉnh -->
+        <circle cx="120" cy="43" r="4.5" fill="#0f172a"/>
+        <text x="102" y="36" font-weight="bold" font-size="15" font-family="serif" font-style="italic">M</text>
+        <!-- Vectơ v_M tiếp tuyến nằm ngang -->
+        <line x1="120" y1="43" x2="215" y2="43" stroke="#2563eb" stroke-width="3.2" marker-end="url(#arrV)"/>
+        <!-- Nhãn vectơ v_M vẽ chuẩn -->
+        <text x="185" y="30" fill="#2563eb" font-weight="bold" font-size="16" font-family="serif" font-style="italic">v<tspan dy="4" font-size="11" font-style="normal">M</tspan></text>
+        <line x1="184" y1="17" x2="201" y2="17" stroke="#2563eb" stroke-width="1.6"/>
+        <polygon points="201,14.5 206,17 201,19.5" fill="#2563eb"/>
+        <!-- Vectơ a_M hướng thẳng vào tâm O -->
+        <line x1="120" y1="43" x2="120" y2="96" stroke="#dc2626" stroke-width="3.2" marker-end="url(#arrA)"/>
+        <!-- Nhãn vectơ a_M vẽ chuẩn -->
+        <text x="84" y="76" fill="#dc2626" font-weight="bold" font-size="16" font-family="serif" font-style="italic">a<tspan dy="4" font-size="11" font-style="normal">M</tspan></text>
+        <line x1="83" y1="63" x2="101" y2="63" stroke="#dc2626" stroke-width="1.6"/>
+        <polygon points="101,60.5 106,63 101,65.5" fill="#dc2626"/>
+    </svg>
+    <div class="figure-legend">
+        <div>• Phương, chiều: $\\vec{a}_{ht} \\perp \\vec{v}_M$ (luôn hướng vào tâm $O$)</div>
+        <div>• Gia tốc hướng tâm: $a_{ht} = \\dfrac{v^2}{r} = \\omega^2 r$</div>
+        <div>• Lực hướng tâm: $F_{ht} = ma_{ht} = \\dfrac{mv^2}{r} = m\\omega^2 r$</div>
+    </div>`,
+
+    // Hình 2: Câu 8 Trang 3 tài liệu (Nhận diện 4 vectơ A, B, C, D tại điểm M)
+    fourVectorsM: `
+    <svg viewBox="0 0 280 205" width="270" height="195">
+        <defs>
+            <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+            </marker>
+            <marker id="arrBlk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f172a"/>
+            </marker>
+        </defs>
+        <circle cx="135" cy="120" r="66" fill="#f8fafc" stroke="#2563eb" stroke-width="2.2"/>
+        <!-- Tâm O -->
+        <circle cx="135" cy="120" r="3.5" fill="#0f172a"/>
+        <text x="118" y="135" font-size="14" font-weight="bold" font-family="serif" font-style="italic">O</text>
+        <!-- Điểm M ở góc 45 độ (x=182, y=73) -->
+        <circle cx="182" cy="73" r="4.5" fill="#dc2626"/>
+        <text x="168" y="62" font-weight="bold" font-size="15" font-family="serif" font-style="italic">M</text>
+
+        <!-- Vectơ D: Hướng từ M vào tâm O -->
+        <line x1="182" y1="73" x2="145" y2="110" stroke="#dc2626" stroke-width="2.8" marker-end="url(#arrRed)"/>
+        <text x="145" y="92" fill="#dc2626" font-weight="bold" font-size="15" font-family="serif" font-style="italic">D</text>
+        <line x1="144" y1="77" x2="157" y2="77" stroke="#dc2626" stroke-width="1.5"/>
+        <polygon points="157,74.5 162,77 157,79.5" fill="#dc2626"/>
+
+        <!-- Vectơ A: Hướng từ M ra ngoài dọc bán kính -->
+        <line x1="182" y1="73" x2="220" y2="35" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arrBlk)"/>
+        <text x="225" y="38" fill="#0f172a" font-weight="bold" font-size="15" font-family="serif" font-style="italic">A</text>
+        <line x1="224" y1="23" x2="237" y2="23" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="237,20.5 242,23 237,25.5" fill="#0f172a"/>
+
+        <!-- Vectơ B: Tiếp tuyến vuông góc với bán kính tại M -->
+        <line x1="182" y1="73" x2="224" y2="115" stroke="#dc2626" stroke-width="2.8" marker-end="url(#arrRed)"/>
+        <text x="230" y="124" fill="#dc2626" font-weight="bold" font-size="15" font-family="serif" font-style="italic">B</text>
+        <line x1="229" y1="109" x2="242" y2="109" stroke="#dc2626" stroke-width="1.5"/>
+        <polygon points="242,106.5 247,109 242,111.5" fill="#dc2626"/>
+
+        <!-- Vectơ C: Nằm ngang sang trái -->
+        <line x1="182" y1="73" x2="124" y2="73" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arrBlk)"/>
+        <text x="102" y="78" fill="#0f172a" font-weight="bold" font-size="15" font-family="serif" font-style="italic">C</text>
+        <line x1="101" y1="63" x2="114" y2="63" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="114,60.5 119,63 114,65.5" fill="#0f172a"/>
+    </svg>
+    <div class="figure-legend">
+        <div>• $\\vec{B}$: Phương tiếp tuyến tại $M$</div>
+        <div>• $\\vec{D}$: Phương bán kính, hướng vào tâm $O$</div>
+        <div>• $\\vec{A}$: Hướng ra xa tâm $O$</div>
+    </div>`,
+
+    // Hình 3: Ô tô vào khúc cua nằm ngang (Trang 11, 13, 14)
+    carCornering: `
+    <svg viewBox="0 0 320 190" width="300" height="180">
+        <defs>
+            <marker id="fArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+            </marker>
+            <marker id="nArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
+            </marker>
+            <marker id="pArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+            </marker>
+        </defs>
+        <!-- Mặt đường ngang -->
+        <line x1="90" y1="125" x2="300" y2="125" stroke="#475569" stroke-width="4"/>
+        <!-- Đường cong quỹ đạo -->
+        <path d="M 20 160 Q 95 95 215 125" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5"/>
+        <circle cx="45" cy="120" r="4" fill="#dc2626"/>
+        <text x="45" y="138" fill="#dc2626" font-weight="bold" font-size="12" text-anchor="middle">Tâm cua O</text>
+        <!-- Thân xe ô tô nhìn từ phía sau -->
+        <rect x="180" y="82" width="70" height="32" rx="6" fill="#1e40af"/>
+        <rect x="190" y="65" width="50" height="20" rx="4" fill="#60a5fa"/>
+        <rect x="183" y="112" width="12" height="13" rx="2" fill="#0f172a"/>
+        <rect x="235" y="112" width="12" height="13" rx="2" fill="#0f172a"/>
+        <!-- Trọng lực P -->
+        <line x1="215" y1="98" x2="215" y2="170" stroke="#2563eb" stroke-width="2.6" marker-end="url(#pArr)"/>
+        <text x="226" y="168" fill="#2563eb" font-weight="bold" font-size="15" font-family="serif" font-style="italic">P</text>
+        <line x1="225" y1="153" x2="237" y2="153" stroke="#2563eb" stroke-width="1.5"/>
+        <polygon points="237,150.5 242,153 237,155.5" fill="#2563eb"/>
+        <!-- Phản lực N -->
+        <line x1="215" y1="98" x2="215" y2="22" stroke="#16a34a" stroke-width="2.6" marker-end="url(#nArr)"/>
+        <text x="226" y="34" fill="#16a34a" font-weight="bold" font-size="15" font-family="serif" font-style="italic">N</text>
+        <line x1="225" y1="19" x2="238" y2="19" stroke="#16a34a" stroke-width="1.5"/>
+        <polygon points="238,16.5 243,19 238,21.5" fill="#16a34a"/>
+        <!-- Lực ma sát nghỉ hướng vào tâm cua -->
+        <line x1="195" y1="120" x2="105" y2="120" stroke="#dc2626" stroke-width="3" marker-end="url(#fArr)"/>
+        <text x="132" y="110" fill="#dc2626" font-weight="bold" font-size="15" font-family="serif" font-style="italic">F<tspan dy="4" font-size="11" font-style="normal">msn</tspan></text>
+        <line x1="131" y1="95" x2="146" y2="95" stroke="#dc2626" stroke-width="1.5"/>
+        <polygon points="146,92.5 151,95 146,97.5" fill="#dc2626"/>
+    </svg>
+    <div class="figure-legend">
+        <div>• Phương thẳng đứng: $\\vec{P} + \\vec{N} = \\vec{0}$</div>
+        <div>• Phương bán kính: $\\vec{F}_{msn} = \\vec{F}_{ht}$</div>
+        <div>• Độ lớn: $F_{ht} = m a_{ht} = \\dfrac{mv^2}{R}$</div>
+    </div>`,
+
+    // Hình 4: Ô tô qua đỉnh cầu vồng lên (Trang 5, 6, 17)
+    carBridge: `
+    <svg viewBox="0 0 280 185" width="265" height="175">
+        <defs>
+            <marker id="bArrP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+            </marker>
+            <marker id="bArrN" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
+            </marker>
+        </defs>
+        <!-- Cầu vồng lên bán kính R -->
+        <path d="M 20 155 Q 140 45 260 155" fill="none" stroke="#475569" stroke-width="6"/>
+        <circle cx="140" cy="170" r="4" fill="#0f172a"/>
+        <text x="150" y="174" font-weight="bold" font-size="12">Tâm O (R)</text>
+        <line x1="140" y1="100" x2="140" y2="170" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <!-- Ô tô ở đỉnh cầu -->
+        <rect x="110" y="72" width="60" height="24" rx="5" fill="#2563eb"/>
+        <circle cx="122" cy="98" r="5" fill="#0f172a"/>
+        <circle cx="158" cy="98" r="5" fill="#0f172a"/>
+        <!-- Phản lực N hướng lên -->
+        <line x1="140" y1="84" x2="140" y2="22" stroke="#16a34a" stroke-width="2.8" marker-end="url(#bArrN)"/>
+        <text x="150" y="34" fill="#16a34a" font-weight="bold" font-size="15" font-family="serif" font-style="italic">N</text>
+        <line x1="149" y1="19" x2="162" y2="19" stroke="#16a34a" stroke-width="1.5"/>
+        <polygon points="162,16.5 167,19 162,21.5" fill="#16a34a"/>
+        <!-- Trọng lực P hướng xuống tâm O -->
+        <line x1="140" y1="84" x2="140" y2="150" stroke="#dc2626" stroke-width="2.8" marker-end="url(#bArrP)"/>
+        <text x="150" y="145" fill="#dc2626" font-weight="bold" font-size="15" font-family="serif" font-style="italic">P</text>
+        <line x1="149" y1="130" x2="161" y2="130" stroke="#dc2626" stroke-width="1.5"/>
+        <polygon points="161,127.5 166,130 161,132.5" fill="#dc2626"/>
+    </svg>
+    <div class="figure-legend">
+        <div>• Hợp lực hướng tâm tại đỉnh cầu:</div>
+        <div>$$P - N = F_{ht} = \\frac{mv^2}{R}$$</div>
+        <div>• Áp lực lên mặt cầu: $Q = N = mg - \\dfrac{mv^2}{R}$</div>
+    </div>`,
+
+    // Hình 5: Đồ thị sự phụ thuộc của Lực hướng tâm F_ht theo bán kính r
+    graphFhtR: `
+    <svg viewBox="0 0 380 230" width="350" height="215">
+        <defs>
+            <marker id="gArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f172a"/>
+            </marker>
+        </defs>
+        <line x1="55" y1="195" x2="345" y2="195" stroke="#0f172a" stroke-width="2" marker-end="url(#gArr)"/>
+        <line x1="55" y1="195" x2="55" y2="25" stroke="#0f172a" stroke-width="2" marker-end="url(#gArr)"/>
+        <text x="335" y="215" font-weight="bold" font-size="14" font-family="serif" font-style="italic">r <tspan font-style="normal" font-size="12">(m)</tspan></text>
+        <text x="10" y="25" font-weight="bold" font-size="14" font-family="serif" font-style="italic">F<tspan dy="3" font-size="10" font-style="normal">ht</tspan><tspan dy="-3" font-style="normal" font-size="12"> (N)</tspan></text>
+        <text x="40" y="212" font-weight="bold" font-size="13">O</text>
+
+        <!-- Đường gióng tọa độ: r = 0,5 m ; F_ht = 4,0 N -->
+        <line x1="170" y1="195" x2="170" y2="120" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <line x1="55" y1="120" x2="170" y2="120" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="170" y="214" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e40af">0,5</text>
+        <text x="48" y="124" font-size="12" font-weight="bold" text-anchor="end" fill="#1e40af">4,0</text>
+
+        <!-- Đường gióng tọa độ 2: r = 1,0 m ; F_ht = 8,0 N -->
+        <line x1="285" y1="195" x2="285" y2="45" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <line x1="55" y1="45" x2="285" y2="45" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="285" y="214" font-size="12" font-weight="bold" text-anchor="middle" fill="#16a34a">1,0</text>
+        <text x="48" y="49" font-size="12" font-weight="bold" text-anchor="end" fill="#16a34a">8,0</text>
+
+        <line x1="55" y1="195" x2="305" y2="32" stroke="#dc2626" stroke-width="3.2"/>
+        <circle cx="170" cy="120" r="5" fill="#1e40af"/>
+        <circle cx="285" cy="45" r="5" fill="#16a34a"/>
+    </svg>
+    <div class="figure-legend">
+        <div>• Điểm gióng 1: $r = 0,5\\text{ m} \\Rightarrow F_{ht} = 4,0\\text{ N}$</div>
+        <div>• Điểm gióng 2: $r = 1,0\\text{ m} \\Rightarrow F_{ht} = 8,0\\text{ N}$</div>
+        <div>• Công thức: $F_{ht} = m a_{ht} = m\\omega^2 r$</div>
+    </div>`
+};
+
+/* =========================================================================
+   3. NGÂN HÀNG CÂU HỎI BÁM SÁT BÀI 32: LỰC HƯỚNG TÂM & GIA TỐC HƯỚNG TÂM
+      - CẤP 1: 12 CÂU NHẬN BIẾT ĐƠN GIẢN
+      - CẤP 2 & 3: 10 CÂU MỨC ĐỘ THÔNG HIỂU CƠ BẢN
+   ========================================================================= */
+const questionBank = {
+    // ================= CẤP ĐỘ 1: 12 CÂU NHẬN BIẾT ĐƠN GIẢN =================
+    1: [
+        {
+            id: "L1_1",
+            text: "Khi một vật chuyển động tròn đều thì <b>vectơ gia tốc</b> của vật có đặc điểm nào sau đây?",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Luôn hướng vào tâm quỹ đạo và có độ lớn không đổi.", isCorrect: true },
+                { text: "Luôn không đổi cả về hướng và độ lớn.", isCorrect: false },
+                { text: "Luôn cùng hướng với vectơ vận tốc tại mọi điểm.", isCorrect: false },
+                { text: "Có độ lớn luôn bằng 0 vì tốc độ không đổi.", isCorrect: false }
+            ],
+            explain: "Trong chuyển động tròn đều, vectơ gia tốc luôn vuông góc với vectơ vận tốc, <b>luôn hướng vào tâm quỹ đạo</b> và có độ lớn không đổi $a_{ht} = \\dfrac{v^2}{r} = \\omega^2 r$ (Câu 1, 4, 10 trang 3-4 tài liệu)."
+        },
+        {
+            id: "L1_2",
+            text: "Trong chuyển động tròn đều, <b>gia tốc hướng tâm</b> đặc trưng cho:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Sự biến thiên về hướng của vectơ vận tốc.", isCorrect: true },
+                { text: "Sự biến thiên về độ lớn của vận tốc.", isCorrect: false },
+                { text: "Sự tăng hay giảm của tốc độ góc.", isCorrect: false },
+                { text: "Quãng đường vật đi được trong 1 chu kì.", isCorrect: false }
+            ],
+            explain: "Theo lý thuyết mục I.1 (trang 2) và Câu 5 (trang 14): Gia tốc hướng tâm đặc trưng cho <b>sự thay đổi về hướng của vectơ vận tốc</b>."
+        },
+        {
+            id: "L1_3",
+            text: "Một chất điểm chuyển động tròn đều trên quỹ đạo bán kính $r$ với tốc độ dài $v$ và tốc độ góc $\\omega$. Công thức tính độ lớn <b>gia tốc hướng tâm</b> $a_{ht}$ là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$a_{ht} = \\dfrac{v^2}{r} = \\omega^2 \\cdot r$", isCorrect: true },
+                { text: "$a_{ht} = \\dfrac{v}{r} = \\omega \\cdot r$", isCorrect: false },
+                { text: "$a_{ht} = v^2 \\cdot r = \\dfrac{\\omega^2}{r}$", isCorrect: false },
+                { text: "$a_{ht} = \\dfrac{r}{v^2} = \\omega \\cdot r^2$", isCorrect: false }
+            ],
+            explain: "Độ lớn gia tốc hướng tâm được xác định bởi công thức: $a_{ht} = \\dfrac{v^2}{r} = \\omega^2 r$ (đơn vị: $\\text{m/s}^2$)."
+        },
+        {
+            id: "L1_4",
+            text: "Lực (hoặc hợp lực của các lực) tác dụng vào một vật chuyển động tròn đều và luôn hướng vào tâm quỹ đạo được gọi là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Lực hướng tâm.", isCorrect: true },
+                { text: "Lực ma sát trượt.", isCorrect: false },
+                { text: "Lực nâng.", isCorrect: false },
+                { text: "Lực đẩy động cơ.", isCorrect: false }
+            ],
+            explain: "Lực hay hợp lực tác dụng lên vật chuyển động tròn đều hướng vào tâm quỹ đạo gọi là <b>lực hướng tâm</b> (Câu 3 trang 3 tài liệu)."
+        },
+        {
+            id: "L1_5",
+            text: "Một vật có khối lượng $m$ chuyển động tròn đều trên quỹ đạo bán kính $r$ với tốc độ dài $v$ và tốc độ góc $\\omega$. Độ lớn <b>lực hướng tâm</b> $F_{ht}$ tác dụng vào vật được tính bằng công thức nào?",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$F_{ht} = m\\omega^2 r = \\dfrac{mv^2}{r}$", isCorrect: true },
+                { text: "$F_{ht} = m\\omega r = \\dfrac{mv}{r}$", isCorrect: false },
+                { text: "$F_{ht} = m\\omega^2 r^2$", isCorrect: false },
+                { text: "$F_{ht} = \\dfrac{mr}{\\omega}$", isCorrect: false }
+            ],
+            explain: "Theo định luật II Newton: $F_{ht} = m \\cdot a_{ht} = m\\omega^2 r = \\dfrac{mv^2}{r}$ (Câu 2 trang 3 & Câu 8 trang 15 tài liệu)."
+        },
+        {
+            id: "L1_6",
+            text: "Trong chuyển động tròn đều, hướng của <b>vectơ lực hướng tâm</b> $\\vec{F}_{ht}$ và <b>vectơ vận tốc</b> $\\vec{v}$ tại cùng một thời điểm có mối quan hệ như thế nào?",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Luôn vuông góc với nhau ($\\vec{F}_{ht} \\perp \\vec{v}$).", isCorrect: true },
+                { text: "Luôn cùng phương, cùng chiều với nhau.", isCorrect: false },
+                { text: "Luôn cùng phương, ngược chiều với nhau.", isCorrect: false },
+                { text: "Hợp với nhau một góc $45^\\circ$ không đổi.", isCorrect: false }
+            ],
+            explain: "Vectơ lực hướng tâm hướng dọc theo bán kính vào tâm, còn vectơ vận tốc nằm theo phương tiếp tuyến nên chúng <b>luôn vuông góc với nhau</b> (Câu 17 trang 4 tài liệu)."
+        },
+        {
+            id: "L1_7",
+            text: "Một chất điểm $M$ thực hiện chuyển động tròn đều như hình vẽ. Nhận xét nào sau đây là <b>đúng</b> về vectơ vận tốc và vectơ gia tốc hướng tâm tại $M$?",
+            svg: SVGs.fourVectorsM,
+            options: [
+                { text: "$\\vec{B}$ là vectơ vận tốc, $\\vec{D}$ là vectơ gia tốc hướng tâm.", isCorrect: true },
+                { text: "$\\vec{A}$ là vectơ vận tốc, $\\vec{B}$ là vectơ gia tốc hướng tâm.", isCorrect: false },
+                { text: "$\\vec{B}$ là vectơ vận tốc, $\\vec{A}$ là vectơ gia tốc hướng tâm.", isCorrect: false },
+                { text: "$\\vec{C}$ là vectơ vận tốc, $\\vec{D}$ là vectơ gia tốc hướng tâm.", isCorrect: false }
+            ],
+            explain: "Tại điểm $M$: Vectơ vận tốc trùng với tiếp tuyến đường tròn là $\\vec{B}$, còn vectơ gia tốc luôn hướng vào tâm quỹ đạo $O$ là $\\vec{D}$ (Câu 8 trang 3 tài liệu)."
+        },
+        {
+            id: "L1_8",
+            text: "Khi một xe đua chạy đều quanh một đường tròn <b>nằm ngang</b>, lực đóng vai trò là lực hướng tâm giữ cho xe chuyển động tròn lúc này là:",
+            svg: SVGs.carCornering,
+            options: [
+                { text: "Lực ma sát nghỉ giữa lốp xe và mặt đường.", isCorrect: true },
+                { text: "Trọng lực của xe.", isCorrect: false },
+                { text: "Lực hãm phanh của xe.", isCorrect: false },
+                { text: "Lực đẩy của động cơ.", isCorrect: false }
+            ],
+            explain: "Trên mặt đường nằm ngang, trọng lực $\\vec{P}$ và phản lực $\\vec{N}$ cân bằng nhau theo phương thẳng đứng, nên <b>lực ma sát nghỉ</b> hướng vào tâm cua đóng vai trò là lực hướng tâm (Câu 15 trang 4 tài liệu)."
+        },
+        {
+            id: "L1_9",
+            text: "Chuyển động của Trái Đất quanh Mặt Trời (hoặc vệ tinh nhân tạo quanh Trái Đất) có thể xem như chuyển động tròn đều vì:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Lực hấp dẫn đóng vai trò là lực hướng tâm có độ lớn không đổi.", isCorrect: true },
+                { text: "Vectơ gia tốc luôn tiếp tuyến với quỹ đạo.", isCorrect: false },
+                { text: "Vectơ vận tốc của Trái Đất không đổi cả hướng và độ lớn.", isCorrect: false },
+                { text: "Các lực tác dụng lên Trái Đất hoàn toàn cân bằng nhau.", isCorrect: false }
+            ],
+            explain: "Lực hút hấp dẫn giữa Mặt Trời và Trái Đất (hoặc giữa Trái Đất và vệ tinh) đóng vai trò là <b>lực hướng tâm</b> giữ cho quỹ đạo gần tròn đều (Câu 18 trang 4-5 tài liệu)."
+        },
+        {
+            id: "L1_10",
+            text: "Ở những đoạn đường vòng (khúc cua), mặt đường thường được nâng cao lên một bên (nghiêng về phía tâm cong). Việc làm này nhằm mục đích chính nào sau đây?",
+            svg: SVGs.carCornering,
+            options: [
+                { text: "Tạo lực hướng tâm (nhờ hợp lực của trọng lực và phản lực) giúp xe qua cua an toàn, hạn chế trượt.", isCorrect: true },
+                { text: "Để tăng tốc độ tối đa của xe đến vô cùng.", isCorrect: false },
+                { text: "Để làm giảm khối lượng của xe khi vào cua.", isCorrect: false },
+                { text: "Để triệt tiêu hoàn toàn gia tốc hướng tâm của xe.", isCorrect: false }
+            ],
+            explain: "Làm mặt đường nghiêng về phía tâm quỹ đạo giúp hợp lực của trọng lực $\\vec{P}$, phản lực $\\vec{N}$ và lực ma sát tạo ra <b>lực hướng tâm</b> đủ lớn để xe không bị trượt văng ra ngoài (Câu 6 trang 14 & Câu 9 trang 15 tài liệu)."
+        },
+        {
+            id: "L1_11",
+            text: "<b>[Phép tính 1 bước]</b> Một vật chuyển động tròn đều với tốc độ dài $v = 4\\text{ m/s}$ trên đường tròn có bán kính $r = 2\\text{ m}$. Gia tốc hướng tâm $a_{ht}$ của vật có độ lớn là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$8\\text{ m/s}^2$", isCorrect: true },
+                { text: "$2\\text{ m/s}^2$", isCorrect: false },
+                { text: "$16\\text{ m/s}^2$", isCorrect: false },
+                { text: "$4\\text{ m/s}^2$", isCorrect: false }
+            ],
+            explain: "Áp dụng công thức: $a_{ht} = \\dfrac{v^2}{r} = \\dfrac{4^2}{2} = \\dfrac{16}{2} = 8\\text{ m/s}^2$."
+        },
+        {
+            id: "L1_12",
+            text: "<b>[Phép tính 1 bước]</b> Một vật có khối lượng $m = 2\\text{ kg}$ chuyển động tròn đều với gia tốc hướng tâm $a_{ht} = 5\\text{ m/s}^2$. Độ lớn lực hướng tâm $F_{ht}$ tác dụng lên vật là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$10\\text{ N}$", isCorrect: true },
+                { text: "$2,5\\text{ N}$", isCorrect: false },
+                { text: "$20\\text{ N}$", isCorrect: false },
+                { text: "$7\\text{ N}$", isCorrect: false }
+            ],
+            explain: "Áp dụng công thức: $F_{ht} = m \\cdot a_{ht} = 2 \\times 5 = 10\\text{ N}$."
+        }
+    ],
+
+    // ================= CẤP ĐỘ 2: 5 CÂU THÔNG HIỂU CƠ BẢN (7 - 8 ĐIỂM) =================
+    2: [
+        {
+            id: "L2_1",
+            text: "Một vật chuyển động tròn đều với tốc độ dài là $v = 3\\text{ m/s}$ và tốc độ góc là $\\omega = 10\\text{ rad/s}$. Độ lớn gia tốc hướng tâm $a_{ht}$ của vật đó là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$30\\text{ m/s}^2$", isCorrect: true },
+                { text: "$60\\text{ m/s}^2$", isCorrect: false },
+                { text: "$15\\text{ m/s}^2$", isCorrect: false },
+                { text: "$3,3\\text{ m/s}^2$", isCorrect: false }
+            ],
+            explain: "Ta có $v = \\omega \\cdot r \\Rightarrow a_{ht} = \\omega^2 r = (\\omega r)\\cdot \\omega = v \\cdot \\omega = 3 \\times 10 = 30\\text{ m/s}^2$ (Câu 31 trang 7 tài liệu)."
+        },
+        {
+            id: "L2_2",
+            text: "Một chiếc xe đạp chạy đều với tốc độ $v = 36\\text{ km/h}$ trên một vòng đua hình tròn có bán kính $R = 100\\text{ m}$. Gia tốc hướng tâm của xe đạp có độ lớn bằng:",
+            svg: SVGs.carCornering,
+            options: [
+                { text: "$1\\text{ m/s}^2$", isCorrect: true },
+                { text: "$10\\text{ m/s}^2$", isCorrect: false },
+                { text: "$5\\text{ m/s}^2$", isCorrect: false },
+                { text: "$12,96\\text{ m/s}^2$", isCorrect: false }
+            ],
+            explain: "• Đổi đơn vị tốc độ: $v = 36\\text{ km/h} = \\dfrac{36}{3,6} = 10\\text{ m/s}$.<br>• Gia tốc hướng tâm: $a_{ht} = \\dfrac{v^2}{R} = \\dfrac{10^2}{100} = 1\\text{ m/s}^2$ (Câu 32 trang 7-8 tài liệu)."
+        },
+        {
+            id: "L2_3",
+            text: "Một chiếc xe chuyển động tròn đều theo một cung tròn với tốc độ $v = 36\\text{ km/h} = 10\\text{ m/s}$ và có gia tốc hướng tâm $a_{ht} = 4,0\\text{ m/s}^2$. Bán kính $R$ của đường vòng cung đó bằng:",
+            svg: SVGs.carCornering,
+            options: [
+                { text: "$25\\text{ m}$", isCorrect: true },
+                { text: "$20\\text{ m}$", isCorrect: false },
+                { text: "$40\\text{ m}$", isCorrect: false },
+                { text: "$15\\text{ m}$", isCorrect: false }
+            ],
+            explain: "Từ công thức $a_{ht} = \\dfrac{v^2}{R} \\Rightarrow R = \\dfrac{v^2}{a_{ht}} = \\dfrac{10^2}{4,0} = \\dfrac{100}{4} = 25\\text{ m}$ (Câu 36 trang 8 tài liệu)."
+        },
+        {
+            id: "L2_4",
+            text: "Một vệ tinh có khối lượng $m = 100\\text{ kg}$ được phóng lên quỹ đạo tròn đều quanh Trái Đất ở độ cao mà tại đó vệ tinh có trọng lượng $P = 920\\text{ N}$. Độ lớn của lực hướng tâm $F_{ht}$ tác dụng lên vệ tinh bằng:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$920\\text{ N}$", isCorrect: true },
+                { text: "$460\\text{ N}$", isCorrect: false },
+                { text: "$1000\\text{ N}$", isCorrect: false },
+                { text: "$100\\text{ N}$", isCorrect: false }
+            ],
+            explain: "Đối với vệ tinh chuyển động tròn đều quanh Trái Đất, trọng lực (lực hấp dẫn của Trái Đất) chính là lực hướng tâm: $F_{ht} = P = 920\\text{ N}$ (Câu 25 trang 6 tài liệu)."
+        },
+        {
+            id: "L2_5",
+            text: "Một vật có khối lượng $m = 0,5\\text{ kg}$ chuyển động tròn đều trên vòng tròn bán kính $r = 1\\text{ m}$ dưới tác dụng của lực hướng tâm có độ lớn $F_{ht} = 8\\text{ N}$. Tốc độ dài $v$ của vật bằng bao nhiêu?",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$4\\text{ m/s}$", isCorrect: true },
+                { text: "$16\\text{ m/s}$", isCorrect: false },
+                { text: "$2\\text{ m/s}$", isCorrect: false },
+                { text: "$8\\text{ m/s}$", isCorrect: false }
+            ],
+            explain: "Từ công thức $F_{ht} = \\dfrac{mv^2}{r} \\Rightarrow v = \\sqrt{\\dfrac{F_{ht}\\cdot r}{m}} = \\sqrt{\\dfrac{8 \\times 1}{0,5}} = \\sqrt{16} = 4\\text{ m/s}$ (Câu 1 Phần III trang 11 tài liệu)."
+        }
+    ],
+
+    // ================= CẤP ĐỘ 3: 5 CÂU THÔNG HIỂU CƠ BẢN (9 - 10 ĐIỂM) =================
+    3: [
+        {
+            id: "L3_1",
+            text: "Trong môn quay tạ, một vận động viên quay dây sao cho quả tạ chuyển động tròn đều trong mặt phẳng nằm ngang trên đường tròn bán kính $r = 2,0\\text{ m}$ với tốc độ dài $v = 2,0\\text{ m/s}$. Biết lực giữ dây (đóng vai trò lực hướng tâm) là $F_{ht} = 10\\text{ N}$. Khối lượng $m$ của quả tạ bằng:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$5\\text{ kg}$", isCorrect: true },
+                { text: "$10\\text{ kg}$", isCorrect: false },
+                { text: "$2,5\\text{ kg}$", isCorrect: false },
+                { text: "$20\\text{ kg}$", isCorrect: false }
+            ],
+            explain: "Lực giữ dây đóng vai trò lực hướng tâm:<br>$$F_{ht} = \\frac{mv^2}{r} \\Rightarrow m = \\frac{F_{ht} \\cdot r}{v^2} = \\frac{10 \\times 2,0}{2,0^2} = 5\\text{ kg}$$ (Câu 3 Phần III trang 11-12 tài liệu)."
+        },
+        {
+            id: "L3_2",
+            text: "Một vật nhỏ có khối lượng $m = 200\\text{ g} = 0,2\\text{ kg}$ chuyển động tròn đều trên quỹ đạo bán kính $r = 1\\text{ m}$ với tốc độ góc $\\omega = 10\\text{ rad/s}$. Gia tốc hướng tâm $a_{ht}$ và độ lớn lực hướng tâm $F_{ht}$ tác dụng lên vật lần lượt là:",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "$a_{ht} = 100\\text{ m/s}^2;\\quad F_{ht} = 20\\text{ N}$.", isCorrect: true },
+                { text: "$a_{ht} = 10\\text{ m/s}^2;\\quad F_{ht} = 2\\text{ N}$.", isCorrect: false },
+                { text: "$a_{ht} = 100\\text{ m/s}^2;\\quad F_{ht} = 200\\text{ N}$.", isCorrect: false },
+                { text: "$a_{ht} = 20\\text{ m/s}^2;\\quad F_{ht} = 4\\text{ N}$.", isCorrect: false }
+            ],
+            explain: "• Gia tốc hướng tâm: $a_{ht} = \\omega^2 r = 10^2 \\times 1 = 100\\text{ m/s}^2$.<br>• Độ lớn lực hướng tâm: $F_{ht} = m \\cdot a_{ht} = 0,2 \\times 100 = 20\\text{ N}$."
+        },
+        {
+            id: "L3_3",
+            text: "Một ô tô có khối lượng $m = 1000\\text{ kg}$ chuyển động đều với tốc độ $v = 36\\text{ km/h} = 10\\text{ m/s}$ đi qua điểm cao nhất của một chiếc cầu vồng lên có bán kính cong $R = 50\\text{ m}$. Lấy $g = 10\\text{ m/s}^2$. Áp lực $Q$ của ô tô nén lên mặt cầu tại điểm cao nhất bằng:",
+            svg: SVGs.carBridge,
+            options: [
+                { text: "$8000\\text{ N}$", isCorrect: true },
+                { text: "$10000\\text{ N}$", isCorrect: false },
+                { text: "$12000\\text{ N}$", isCorrect: false },
+                { text: "$2000\\text{ N}$", isCorrect: false }
+            ],
+            explain: "Tại điểm cao nhất của cầu vồng lên, hợp lực của trọng lực và phản lực đóng vai trò lực hướng tâm ($P - N = F_{ht}$):<br>$$Q = N = mg - \\frac{mv^2}{R} = 1000 \\times 10 - \\frac{1000 \\times 10^2}{50} = 10000 - 2000 = 8000\\text{ N}$$ (Câu 2 Phần III trang 11 tài liệu)."
+        },
+        {
+            id: "L3_4",
+            text: "Một vật đang chuyển động tròn đều dưới tác dụng của lực hướng tâm $F = \\dfrac{mv^2}{r}$. Nếu giữ nguyên tốc độ dài $v$ nhưng <b>tăng bán kính quỹ đạo $r$ lên gấp đôi</b> ($r' = 2r$) thì độ lớn lực hướng tâm sẽ thay đổi như thế nào?",
+            svg: SVGs.centripetalBasic,
+            options: [
+                { text: "Giảm đi 2 lần.", isCorrect: true },
+                { text: "Tăng lên 2 lần.", isCorrect: false },
+                { text: "Giảm đi 4 lần.", isCorrect: false },
+                { text: "Không thay đổi.", isCorrect: false }
+            ],
+            explain: "Từ công thức $F_{ht} = \\dfrac{mv^2}{r}$: Khi khối lượng $m$ và tốc độ dài $v$ không đổi thì lực hướng tâm tỉ lệ nghịch với bán kính $r$. Do đó $r$ tăng 2 lần thì $F_{ht}$ <b>giảm 2 lần</b>."
+        },
+        {
+            id: "L3_5",
+            text: "<b>[Đọc đồ thị cơ bản]</b> Một vật nhỏ có khối lượng $m = 0,5\\text{ kg}$ được gắn trên một bàn quay đang quay đều với tốc độ góc $\\omega$ không đổi. Đồ thị bên dưới biểu diễn sự phụ thuộc của lực hướng tâm $F_{ht}$ tác dụng lên vật theo khoảng cách $r$ từ vật đến trục quay. Dựa vào đường gióng tại $(r = 0,5\\text{ m};\\; F_{ht} = 4,0\\text{ N})$, hãy xác định gia tốc hướng tâm $a_{ht}$ của vật tại vị trí đó:",
+            svg: SVGs.graphFhtR,
+            options: [
+                { text: "$a_{ht} = 8,0\\text{ m/s}^2$", isCorrect: true },
+                { text: "$a_{ht} = 2,0\\text{ m/s}^2$", isCorrect: false },
+                { text: "$a_{ht} = 4,0\\text{ m/s}^2$", isCorrect: false },
+                { text: "$a_{ht} = 16,0\\text{ m/s}^2$", isCorrect: false }
+            ],
+            explain: "Từ đường gióng trên đồ thị: tại $r = 0,5\\text{ m}$ thì lực hướng tâm là $F_{ht} = 4,0\\text{ N}$.<br>Áp dụng công thức: $F_{ht} = m \\cdot a_{ht} \\Rightarrow a_{ht} = \\dfrac{F_{ht}}{m} = \\dfrac{4,0}{0,5} = 8,0\\text{ m/s}^2$."
+        }
+    ]
+};
+
+/* =========================================================================
+   4. QUẢN LÝ TRẠNG THÁI LÀM BÀI, ĐẢO CÂU HỎI & KIỂM SOÁT MỞ KHÓA
+   ========================================================================= */
+let currentLevel = 1;
+let level1PerfectCount = 0; // Đếm số lần đạt 12/12 ở Cấp độ 1 (cần 3 lần để mở khóa)
+let isUnlocked = false;     // Trạng thái mở khóa Cấp độ 2 & 3
+let unlockedByTeacher = false;
+
+let state = {
+    1: { answered: 0, correct: 0, total: 12, currentRoundCounted: false, questions: [] },
+    2: { answered: 0, correct: 0, total: 5, bestScore: 0, questions: [] },
+    3: { answered: 0, correct: 0, total: 5, bestScore: 0, questions: [] }
+};
+
+function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function prepareLevelQuestions(lvl) {
+    const rawList = questionBank[lvl];
+    const shuffledQuestions = shuffleArray(rawList).map(q => {
+        return {
+            ...q,
+            shuffledOptions: shuffleArray(q.options),
+            userSelected: null
+        };
+    });
+    state[lvl].questions = shuffledQuestions;
+    state[lvl].answered = 0;
+    state[lvl].correct = 0;
+    state[lvl].currentRoundCounted = false;
+}
+
+function renderQuiz() {
+    const quizArea = document.getElementById('quizArea');
+    const currentData = state[currentLevel];
+    const letters = ['A', 'B', 'C', 'D'];
+
+    let html = '';
+    currentData.questions.forEach((q, qIdx) => {
+        html += `
+        <div class="question-card" id="qcard_${qIdx}">
+            <div class="q-header">
+                <span>CÂU HỎI ${qIdx + 1} / ${currentData.total} (Cấp độ ${currentLevel})</span>
+                <span id="qstatus_${qIdx}">Chưa trả lời</span>
+            </div>
+            <div class="q-text">${q.text}</div>
+            ${q.svg ? `<div class="svg-container">${q.svg}</div>` : ''}
+            <div class="options-list">
+                ${q.shuffledOptions.map((opt, oIdx) => `
+                    <button class="option-btn" id="opt_${qIdx}_${oIdx}" onclick="selectAnswer(${qIdx}, ${oIdx})">
+                        <span class="opt-letter">${letters[oIdx]}</span>
+                        <span>${opt.text}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <div class="feedback-box" id="fb_${qIdx}"></div>
+        </div>`;
+    });
+
+    quizArea.innerHTML = html;
+    updateTopUI();
+
+    if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([quizArea]);
+    }
+}
+
+function selectAnswer(qIdx, oIdx) {
+    const currentData = state[currentLevel];
+    const q = currentData.questions[qIdx];
+    if (q.userSelected !== null) return;
+
+    q.userSelected = oIdx;
+    currentData.answered++;
+
+    const chosenOpt = q.shuffledOptions[oIdx];
+    const isCorrect = chosenOpt.isCorrect;
+
+    playFunnySound(isCorrect);
+
+    q.shuffledOptions.forEach((opt, idx) => {
+        const btn = document.getElementById(`opt_${qIdx}_${idx}`);
+        btn.disabled = true;
+        if (opt.isCorrect) {
+            btn.classList.add('correct');
+        } else if (idx === oIdx && !isCorrect) {
+            btn.classList.add('wrong');
+        }
+    });
+
+    const statusSpan = document.getElementById(`qstatus_${qIdx}`);
+    const fbBox = document.getElementById(`fb_${qIdx}`);
+
+    if (isCorrect) {
+        currentData.correct++;
+        statusSpan.innerHTML = '✅ Chính xác!';
+        statusSpan.style.color = 'var(--success)';
+        fbBox.className = 'feedback-box show ok';
+        fbBox.innerHTML = `<strong>🎉 Tuyệt vời! Đáp án ĐÚNG.</strong><br>${q.explain}`;
+    } else {
+        statusSpan.innerHTML = '❌ Chưa đúng';
+        statusSpan.style.color = 'var(--danger)';
+        fbBox.className = 'feedback-box show err';
+        fbBox.innerHTML = `<strong>💡 Rất tiếc! Đáp án chưa chính xác.</strong><br>${q.explain}`;
+    }
+
+    if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([fbBox]);
+    }
+
+    checkLevelCompletion();
+    updateTopUI();
+}
+
+function checkLevelCompletion() {
+    const d = state[currentLevel];
+    if (d.answered < d.total) return;
+
+    if (currentLevel === 1 && !d.currentRoundCounted) {
+        d.currentRoundCounted = true;
+        if (d.correct === 12) {
+            level1PerfectCount++;
+            if (level1PerfectCount >= 3) {
+                isUnlocked = true;
+                setTimeout(() => {
+                    alert("🎊 CHÚC MỪNG EM! Em đã hoàn thành 12/12 câu Cấp độ 1 đủ 3 lần! Cấp độ 2 và Cấp độ 3 đã chính thức MỞ KHÓA!");
+                }, 200);
+            } else {
+                setTimeout(() => {
+                    alert(`👏 Giỏi lắm! Em đã đạt 12/12 câu Cấp độ 1 (Lần ${level1PerfectCount}/3).\nHãy bấm nút "Đảo đề & Làm lại Cấp độ này" thêm ${3 - level1PerfectCount} lần đạt 12/12 nữa để mở khóa Cấp độ 2, 3 nhé!`);
+                }, 200);
+            }
+        } else {
+            setTimeout(() => {
+                alert(`📌 Em đạt ${d.correct}/12 câu ở lượt này.\nYêu cầu bắt buộc: Phải đúng tuyệt đối 12/12 câu đủ 3 lần mới mở khóa Cấp độ tiếp theo. Hãy bấm "Đảo đề & Làm lại Cấp độ này" để thử lại nhé!`);
+            }, 200);
+        }
+    } else if (currentLevel > 1) {
+        if (d.correct > d.bestScore) d.bestScore = d.correct;
+    }
+}
+
+function updateTopUI() {
+    document.getElementById('badge1').innerText = `Đạt 12/12: ${level1PerfectCount}/3 lần (Hiện tại: ${state[1].correct}/12)`;
+    
+    const tab2 = document.getElementById('tab2');
+    const tab3 = document.getElementById('tab3');
+    const badge2 = document.getElementById('badge2');
+    const badge3 = document.getElementById('badge3');
+
+    if (isUnlocked) {
+        tab2.classList.remove('locked');
+        tab3.classList.remove('locked');
+        tab2.querySelector('div').innerText = '🔓 CẤP ĐỘ 2 (7 - 8 Điểm: 5 câu)';
+        tab3.querySelector('div').innerText = '🔓 CẤP ĐỘ 3 (9 - 10 Điểm: 5 câu)';
+        badge2.innerText = `Đúng: ${state[2].correct}/5 câu`;
+        badge3.innerText = `Đúng: ${state[3].correct}/5 câu`;
+    } else {
+        badge2.innerText = 'Chưa mở khóa';
+        badge3.innerText = 'Chưa mở khóa';
+    }
+
+    [1, 2, 3].forEach(lvl => {
+        const t = document.getElementById(`tab${lvl}`);
+        if (lvl === currentLevel) t.classList.add('active');
+        else t.classList.remove('active');
+    });
+
+    const statusTitle = document.getElementById('statusTitle');
+    const statusDesc = document.getElementById('statusDesc');
+    if (currentLevel === 1) {
+        statusTitle.innerText = `📌 Cấp độ 1 (Đã làm: ${state[1].answered}/12 câu | Đúng: ${state[1].correct}/12):`;
+        statusDesc.innerHTML = isUnlocked
+            ? `✅ Đã mở khóa tất cả các cấp độ! (Số lần đạt 12/12: <b>${level1PerfectCount}</b> lần)`
+            : `Cần đúng <b>12/12 câu</b> đủ <b>3 lần</b> để mở khóa Cấp độ 2 & 3 (Hiện tại: <b>${level1PerfectCount}/3 lần</b>).`;
+    } else {
+        statusTitle.innerText = `📌 Cấp độ ${currentLevel} (Đã làm: ${state[currentLevel].answered}/5 câu | Đúng: ${state[currentLevel].correct}/5):`;
+        statusDesc.innerHTML = `Các câu hỏi mức độ Thông hiểu cơ bản giúp vận dụng công thức gia tốc hướng tâm và lực hướng tâm.`;
+    }
+}
+
+function switchLevel(lvl) {
+    if (lvl > 1 && !isUnlocked) {
+        playFunnySound(false);
+        alert("🔒 Cấp độ này đang khóa!\nHọc sinh bắt buộc phải hoàn thành 12 câu Cấp độ 1 và đạt đúng 12/12 câu đủ 3 lần mới được chuyển lên.\n(Dành cho Giáo viên: Nhập mật mã vào ô **** để mở khóa).");
+        return;
+    }
+    currentLevel = lvl;
+    renderQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function retryCurrentLevel() {
+    prepareLevelQuestions(currentLevel);
+    renderQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Chế độ Mở khóa cho Giáo viên (Ẩn hoàn toàn mã 1819 dưới dạng kí tự *)
+function unlockByTeacher() {
+    const inputEl = document.getElementById('teacherCode');
+    const code = inputEl.value.trim();
+    if (code === '1819') {
+        isUnlocked = true;
+        unlockedByTeacher = true;
+        inputEl.value = '';
+        playFunnySound(true);
+        updateTopUI();
+        alert("🔓 Xác nhận mật mã Giáo viên thành công! Đã mở khóa toàn bộ Cấp độ 2 và Cấp độ 3.");
+    } else {
+        inputEl.value = '';
+        playFunnySound(false);
+        alert("❌ Mật mã Giáo viên không đúng!");
+    }
+}
+
+/* =========================================================================
+   5. BÁO CÁO HỌ TÊN & KẾT QUẢ THỰC HIỆN
+   ========================================================================= */
+function showReportModal() {
+    const name = document.getElementById('studentName').value.trim() || "Chưa nhập Họ tên";
+    const cls = document.getElementById('studentClass').value.trim() || "Chưa nhập Lớp";
+
+    const totalCorrect = state[1].correct + state[2].correct + state[3].correct;
+    const score10 = ((totalCorrect / 22) * 10).toFixed(2);
+
+    const reportHTML = `
+        <p>👤 <b>Họ và tên học sinh:</b> ${name}</p>
+        <p>🏫 <b>Lớp:</b> ${cls}</p>
+        <hr style="margin:8px 0; border:none; border-top:1px solid #cbd5e1;">
+        <p>📘 <b>Chuyên đề:</b> Bài 32 - Lực hướng tâm và Gia tốc hướng tâm</p>
+        <p>🟢 <b>Cấp độ 1 (12 câu Nhận biết):</b> Đúng ${state[1].correct}/12 câu <i>(Số lần đạt 12/12: <b>${level1PerfectCount} lần</b>)</i></p>
+        <p>🟡 <b>Cấp độ 2 (5 câu 7-8 điểm):</b> Đúng ${state[2].correct}/5 câu</p>
+        <p>🔴 <b>Cấp độ 3 (5 câu 9-10 điểm):</b> Đúng ${state[3].correct}/5 câu</p>
+        <hr style="margin:8px 0; border:none; border-top:1px solid #cbd5e1;">
+        <p>🌟 <b>Tổng số câu đúng hiện tại:</b> <b>${totalCorrect} / 22 câu</b> (Quy đổi: <b>${score10} / 10 điểm</b>)</p>
+        <p>🔑 <b>Trạng thái mở khóa:</b> ${unlockedByTeacher ? "Mở bằng mật mã Giáo viên" : (isUnlocked ? "Học sinh tự vượt qua 3 lần 12/12" : "Chưa mở khóa Cấp 2, 3")}</p>
+    `;
+    document.getElementById('reportContent').innerHTML = reportHTML;
+    document.getElementById('reportModal').classList.add('active');
+}
+
+function closeReportModal() {
+    document.getElementById('reportModal').classList.remove('active');
+}
+
+function copyReport() {
+    const text = document.getElementById('reportContent').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Đã sao chép phiếu báo cáo kết quả! Em có thể dán (Paste) gửi cho Giáo viên.");
+    });
+}
+
+window.onload = function() {
+    prepareLevelQuestions(1);
+    prepareLevelQuestions(2);
+    prepareLevelQuestions(3);
+    renderQuiz();
+};
+</script>
+</body>
+</html>
